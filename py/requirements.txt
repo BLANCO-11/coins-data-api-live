@@ -1,0 +1,7 @@
+beautifulsoup4==4.12.3
+chromedriver_autoinstaller==0.6.4
+Requests==2.32.3
+selenium==4.24.0
+SQLAlchemy==2.0.21
+urllib3==1.26.14
+psycopg2

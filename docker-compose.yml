@@ -1,0 +1,84 @@
+version: '3.8'
+services:
+  spring-app:
+    image: test1.jar
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db/crypto
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      - db
+    volumes:
+      - shared-data:/app/shared
+    ports:
+      - "8080:8080"
+
+  python-scraper:
+    build:
+      shm_size: '2gb'
+      context: ./py
+      dockerfile: Dockerfile  # Ensure this is the correct path to your Dockerfile
+    shm_size: 2gb
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:root@db/crypto
+    depends_on:
+      - spring-app
+    volumes:
+      - shared-data:/app/shared
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: crypto
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ..//dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    ports:
+      - "5432:5432"
+
+volumes:
+  shared-data:
+  pgdata:
+
+
+# version: '3.8'
+# services:
+#   spring-backend:
+#     image: test1.jar
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - "8080:8080"
+#     depends_on:
+#       - db
+#     environment:
+#       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/crypto
+#       SPRING_DATASOURCE_USERNAME: postgres
+#       SPRING_DATASOURCE_PASSWORD: root
+
+#   db:
+#     image: postgres:latest
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+#     environment:
+#       POSTGRES_DB: crypto
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: root
+
+#   python-scraper:
+#     build: ./py
+#     depends_on:
+#       - spring-backend
+#     environment:
+#       DATABASE_URL: postgres://postgres:root@db:5432/crypto
+#     # You can set up a cron job in this container or use another tool like Celery to run periodically.
+
+# volumes:
+#   pgdata:
+
